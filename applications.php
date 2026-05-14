@@ -19,13 +19,13 @@ if($_SERVER['REQUEST_METHOD'] ==== 'POST'){
 
     if(!$course_name || !$start_date || !$payment){
         http_response_code(400);
-        echo json_encode(['error'] => 'Заполните все поля!');
+        echo json_encode(['error' => 'Заполните все поля!']);
         exit;
     }
 
     if(!in_array($payment, ['Наличными','Перевод по номеру телефона'])){
         http_response_code(400);
-        echo json_encode(['error'] => 'Неверный метод оплаты');
+        echo json_encode(['error' => 'Неверный метод оплаты']);
         exit;
     }
 
@@ -36,7 +36,7 @@ if($_SERVER['REQUEST_METHOD'] ==== 'POST'){
     ];
     if(!in_array($course_name, $course_names)){
         http_response_code(400);
-        echo json_encode(['error'] => 'Неверное название курса');
+        echo json_encode(['error' => 'Неверное название курса']);
         exit;
     }
     try{
@@ -45,14 +45,27 @@ if($_SERVER['REQUEST_METHOD'] ==== 'POST'){
             VALUES (?, ?, ?, ?)
         ");
         $stmt->execute([$user_id, $course_name, $start_date, $payment_method]);
-        echo json_encode(['message' => 'Заявка отправлена'])
+        echo json_encode(['message' => 'Заявка отправлена']);
     } catch (Exception $e){
         http_response_code(500);
-        echo json_encode(['error' => 'Ошибка при подаче заявки'])
+        echo json_encode(['error' => 'Ошибка при подаче заявки']);
     }
 
 } else {
     try{
-        $stmt
+        $stmt = $pdo->prepare("
+            SELECT * FROM applications
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$user_id]);
+        $applications = $stmt->fetchAll();
+        foreach ($applications as &$app){
+            $app['can_review'] = ($app['status'] === 'Обучение завершено');
+        }
+        echo json_encode($applications);
+    } catch (Exception $e){
+     http_response_code(500);
+     echo json_encode(['error' => 'Не удалось загрузить заявки']);
     }
 }
