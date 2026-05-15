@@ -45,21 +45,21 @@ CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id
 
 -- Тестовые пользователи
 -- Admin / KorokNET
--- user1 / password123
--- user2 / password123
-INSERT INTO `users` (`id`, `login`, `password`, `fio`, `phone`, `email`, `role`) VALUES(
-(1, 'Admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Администратор Системы', '8(000)000-00-00', 'admin@korochki.ru', 'admin'),
-(2, 'user1', '$2y$10$wJ0h5V6v7cX8d9e0f1g2h3uT5vW6xY7zA8bC9dE0fG1hI2jK3lM4', 'Иванов Иван Иванович', '8(123)456-78-90', 'ivan@example.com', 'user'),
-(3, 'user2', '$2y$10$wJ0h5V6v7cX8d9e0f1g2h3uT5vW6xY7zA8bC9dE0fG1hI2jK3lM4', 'Петрова Мария Сергеевна', '8(987)654-32-10', 'maria@example.com', 'user'));
+-- userOne / password123
+-- userTwo / password123
+INSERT INTO `users` (`id`, `login`, `password`, `fio`, `phone`, `email`, `role`) VALUES
+(1, 'Admin', '$2y$10$M/DWKvd90PwIrUWcuXYiAegSCyM7Gz43uEQMRt4clYVIm.GU5RO9G', 'Администратор Системы', '8(000)000-00-00', 'admin@korochki.ru', 'admin'),
+(2, 'userOne', '$2y$10$4WGZKiPltndSS1efsKi3i.76HqaQoTWN7REt2VV.rUIAX81dDTeIe', 'Иванов Иван Иванович', '8(123)456-78-90', 'ivan@example.com', 'user'),
+(3, 'userTwo', '$2y$10$4WGZKiPltndSS1efsKi3i.76HqaQoTWN7REt2VV.rUIAX81dDTeIe', 'Петрова Мария Сергеевна', '8(987)654-32-10', 'maria@example.com', 'user');
 
 -- Тестовые заявки
-INSERT INTO `applications` (`id`, `user_id`, `course_name`, `start_date`, `payment_method`, `status`, `feedback`) VALUES(
+INSERT INTO `applications` (`id`, `user_id`, `course_name`, `start_date`, `payment_method`, `status`, `feedback`) VALUES
 (1, 2, 'Основы алгоритмизации и программирования', '2026-06-01', 'Наличными', 'Новая', NULL),
 (2, 2, 'Основы веб-дизайна', '2026-07-15', 'Перевод по номеру телефона', 'Идет обучение', NULL),
 (3, 2, 'Основы проектирования баз данных', '2026-08-20', 'Наличными', 'Обучение завершено', 'Отличный курс! Много практики.'),
 (4, 3, 'Основы веб-дизайна', '2026-06-10', 'Перевод по номеру телефона', 'Новая', NULL),
 (5, 3, 'Основы алгоритмизации и программирования', '2026-07-01', 'Наличными', 'Идет обучение', NULL),
-(6, 3, 'Основы проектирования баз данных', '2026-09-05', 'Перевод по номеру телефона', 'Обучение завершено', 'Преподаватель объясняет понятно.'));
+(6, 3, 'Основы проектирования баз данных', '2026-09-05', 'Перевод по номеру телефона', 'Обучение завершено', 'Преподаватель объясняет понятно.');
 
 ALTER TABLE `users` AUTO_INCREMENT = 4;
 ALTER TABLE `applications` AUTO_INCREMENT = 7;
