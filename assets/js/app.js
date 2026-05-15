@@ -1,6 +1,7 @@
 // ============================================================
 // ЕДИНЫЙ СКРИПТ ПРОЕКТА "КОРОЧКИ.ЕСТЬ"
 // Автоматически определяет текущую страницу и запускает нужную логику
+// Все пути к API: ../api/ (так как файл лежит в assets/js/)
 // ============================================================
 
 // ============================================================
@@ -14,9 +15,13 @@
  * @param {boolean} isError - true = ошибка (красный), false = успех (зелёный)
  */
 function showMessage(elementId, text, isError = false) {
+    // Находим элемент на странице по его ID
     const el = document.getElementById(elementId);
-    if (!el) return; // Если элемент не найден — выходим
+    // Если элемент не найден — выходим из функции
+    if (!el) return;
+    // Устанавливаем текст сообщения
     el.textContent = text;
+    // Устанавливаем CSS-класс: alert-error или alert-success
     el.className = isError ? 'alert-error' : 'alert-success';
 }
 
@@ -28,14 +33,18 @@ async function checkAuthAndRedirect() {
     try {
         // Запрос к API для проверки сессии (путь из assets/js/ в api/)
         const res = await fetch('../api/check-auth.php');
+        // Преобразуем ответ в JSON
         const data = await res.json();
 
+        // Если пользователь не авторизован — перенаправляем на вход
         if (!data.authenticated) {
-            window.location.href = 'login.html'; // Перенаправление на вход
+            window.location.href = 'login.html';
             return null;
         }
+        // Возвращаем данные пользователя для использования на странице
         return data.user;
     } catch (err) {
+        // При ошибке сети тоже перенаправляем на вход
         console.log(err);
         window.location.href = 'login.html';
         return null;
@@ -46,10 +55,14 @@ async function checkAuthAndRedirect() {
 // СТРАНИЦА РЕГИСТРАЦИИ (register.html)
 // ============================================================
 if (document.getElementById('registerForm')) {
+    // Назначаем обработчик события "отправка формы"
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Отменяем стандартную отправку формы
+        // Отменяем стандартную отправку формы (перезагрузку страницы)
+        e.preventDefault();
 
-        // Собираем данные из полей формы
+        // ============================================================
+        // СБОР ДАННЫХ ИЗ ФОРМЫ
+        // ============================================================
         const data = {
             login: document.getElementById('login').value,
             password: document.getElementById('password').value,
@@ -63,15 +76,19 @@ if (document.getElementById('registerForm')) {
         // ============================================================
         let errors = [];
 
+        // Проверка логина: минимум 6 символов, только латиница и цифры
         if (data.login.length < 6 || !/^[a-zA-Z0-9]+$/.test(data.login)) {
             errors.push('Логин: латиница и цифры, минимум 6 символов');
         }
+        // Проверка пароля: минимум 8 символов
         if (data.password.length < 8) {
             errors.push('Пароль: минимум 8 символов');
         }
-        if (!/^[а-яА-Я\s]+$/.test(data.fio)) {
+        // Проверка ФИО: только кириллица и пробелы
+        if (!/^[а-яА-Я\s]+$/u.test(data.fio)) {
             errors.push('ФИО: только кириллица и пробелы');
         }
+        // Проверка телефона: строгий формат 8(XXX)XXX-XX-XX
         if (!/^8\(\d{3}\)\d{3}-\d{2}-\d{2}$/.test(data.phone)) {
             errors.push('Телефон: формат 8(XXX)XXX-XX-XX');
         }
@@ -94,12 +111,15 @@ if (document.getElementById('registerForm')) {
             const result = await res.json();
 
             if (res.ok) {
+                // Успех: показываем сообщение и перенаправляем на вход
                 showMessage('message', 'Успешная регистрация! Переход на вход...', false);
                 setTimeout(() => window.location.href = 'login.html', 3000);
             } else {
+                // Ошибка сервера: показываем текст ошибки
                 showMessage('message', result.error, true);
             }
         } catch (err) {
+            // Ошибка сети: не удалось связаться с сервером
             showMessage('message', 'Не удалось подключиться к серверу', true);
         }
     });
@@ -112,17 +132,20 @@ if (document.getElementById('loginForm')) {
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Собираем данные формы
         const data = {
             login: document.getElementById('login').value.trim(),
             password: document.getElementById('password').value,
         };
 
+        // Проверка на пустые поля
         if (!data.login || !data.password) {
             showMessage('message', 'Введите логин и пароль!', true);
             return;
         }
 
         try {
+            // Отправляем запрос на сервер для авторизации
             const res = await fetch('../api/login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -131,9 +154,11 @@ if (document.getElementById('loginForm')) {
             const result = await res.json();
 
             if (res.ok) {
+                // Успех: перенаправляем на страницу, указанную сервером
                 showMessage('message', 'Успешный вход!', false);
                 setTimeout(() => window.location.href = result.redirect, 1000);
             } else {
+                // Ошибка: неверный логин или пароль
                 showMessage('message', result.error, true);
             }
         } catch (err) {
@@ -148,20 +173,27 @@ if (document.getElementById('loginForm')) {
 // ============================================================
 if (document.getElementById('applicationForm')) {
 
-    // Проверка авторизации при загрузке страницы
+    // ============================================================
+    // ПРОВЕРКА АВТОРИЗАЦИИ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+    // ============================================================
     checkAuthAndRedirect().then(user => {
         if (user) {
+            // Отображаем приветствие с ФИО пользователя
             document.getElementById('welcomeMessage').textContent = `Здравствуйте, ${user.fio}!`;
         }
     });
 
-    // Обработчик кнопки "Выйти"
+    // ============================================================
+    // ОБРАБОТЧИК КНОПКИ "ВЫЙТИ"
+    // ============================================================
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         await fetch('../api/logout.php', { method: 'POST' });
         window.location.href = 'login.html';
     });
 
-    // Обработчик формы подачи заявки
+    // ============================================================
+    // ОБРАБОТЧИК ФОРМЫ ПОДАЧИ ЗАЯВКИ
+    // ============================================================
     document.getElementById('applicationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -170,12 +202,14 @@ if (document.getElementById('applicationForm')) {
             payment: document.getElementById('payment').value
         };
 
+        // Проверка заполненности всех полей
         if (!data.course_name || !data.start_date || !data.payment) {
             showMessage('appMessage', 'Заполните все поля', true);
             return;
         }
 
         try {
+            // Отправляем заявку на сервер
             const res = await fetch('../api/applications.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -197,7 +231,7 @@ if (document.getElementById('applicationForm')) {
     });
 
     // ============================================================
-    // ФУНКЦИЯ: ЗАГРУЗКА СПИСКА ЗАЯВОК
+    // ФУНКЦИЯ: ЗАГРУЗКА СПИСКА ЗАЯВОК ПОЛЬЗОВАТЕЛЯ
     // ============================================================
     async function loadApplications() {
         try {
@@ -205,6 +239,7 @@ if (document.getElementById('applicationForm')) {
             const result = await res.json();
             const container = document.getElementById('applicationsList');
 
+            // Если сервер вернул ошибку
             if (result.error) {
                 container.innerHTML = `<div class="alert-error">${result.error}</div>`;
                 return;
@@ -234,7 +269,7 @@ if (document.getElementById('applicationForm')) {
     }
 
     // ============================================================
-    // ФУНКЦИЯ: ОТПРАВКА ОТЗЫВА
+    // ФУНКЦИЯ: ОТПРАВКА ОТЗЫВА НА СЕРВЕР
     // ============================================================
     async function submitReview(appId, reviewText) {
         try {
@@ -247,7 +282,7 @@ if (document.getElementById('applicationForm')) {
 
             if (res.ok) {
                 alert('Отзыв сохранён!');
-                loadApplications();
+                loadApplications(); // Обновляем список после сохранения
             } else {
                 alert('Ошибка: ' + (result.error || 'не удалось сохранить'));
             }
@@ -266,47 +301,84 @@ if (document.getElementById('applicationForm')) {
 // ============================================================
 if (document.getElementById('allApplications')) {
 
-    // Проверка прав администратора
+    // ============================================================
+    // ПРОВЕРКА ПРАВ АДМИНИСТРАТОРА
+    // ============================================================
     checkAuthAndRedirect().then(user => {
         if (user && user.role !== 'admin') {
-            window.location.href = 'dashboard.html'; // Перенаправляем обычных пользователей
+            // Если пользователь не админ — перенаправляем в личный кабинет
+            window.location.href = 'dashboard.html';
         }
     });
 
     // ============================================================
-    // ФУНКЦИЯ: ЗАГРУЗКА ВСЕХ ЗАЯВОК
+    // ОБРАБОТЧИК КНОПКИ "ВЫЙТИ" ДЛЯ АДМИНА
+    // ============================================================
+    document.getElementById('adminLogoutBtn')?.addEventListener('click', async () => {
+        await fetch('../api/logout.php', { method: 'POST' });
+        window.location.href = 'login.html';
+    });
+
+    // Глобальная переменная для хранения всех заявок (для клиентской фильтрации)
+    let allAppsData = [];
+
+    // ============================================================
+    // ФУНКЦИЯ: ЗАГРУЗКА ВСЕХ ЗАЯВОК С СЕРВЕРА
     // ============================================================
     async function loadAllApplications() {
         try {
             const res = await fetch('../api/admin.php');
-            const result = await res.json();
-            const container = document.getElementById('allApplications');
-
-            if (result.error) {
-                container.innerHTML = `<div class="alert-error">${result.error}</div>`;
-                return;
-            }
-
-            // Формируем HTML для отображения заявок
-            container.innerHTML = result.length ? result.map(app => `
-                <div class="card mb-2 p-2">
-                    <strong>${app.user_fio}</strong> — ${app.course_name}<br>
-                    Дата: ${app.start_date} | Оплата: ${app.payment_method}<br>
-                    Статус: <span id="status-${app.id}">${app.status}</span>
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-warning" onclick="updateStatus(${app.id}, 'Идет обучение')">Идет обучение</button>
-                        <button class="btn btn-sm btn-success" onclick="updateStatus(${app.id}, 'Обучение завершено')">Завершено</button>
-                    </div>
-                </div>
-            `).join('') : '<p>Нет заявок</p>';
+            allAppsData = await res.json(); // Сохраняем для фильтрации
+            filterAndRender(); // Применяем текущий фильтр и отрисовываем
         } catch (err) {
             console.log(err);
             document.getElementById('errorMessage').textContent = err.message;
+            document.getElementById('errorMessage').style.display = 'block';
         }
     }
 
     // ============================================================
-    // ФУНКЦИЯ: ОБНОВЛЕНИЕ СТАТУСА ЗАЯВКИ (глобальная для onclick)
+    // ФУНКЦИЯ: ФИЛЬТРАЦИЯ И ОТРИСОВКА ЗАЯВОК
+    // ============================================================
+    function filterAndRender() {
+        const filter = document.getElementById('statusFilter')?.value || 'all';
+        // Фильтруем массив: если 'all' — показываем всё, иначе — только выбранный статус
+        const filtered = filter === 'all' ? allAppsData : allAppsData.filter(app => app.status === filter);
+        const container = document.getElementById('allApplications');
+
+        if (filtered.error) {
+            container.innerHTML = `<div class="alert-error">${filtered.error}</div>`;
+            return;
+        }
+
+        // Формируем HTML для отображения заявок
+        container.innerHTML = filtered.length ? filtered.map(app => `
+            <div class="card mb-2 p-2">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span><strong>${app.user_fio}</strong> — ${app.course_name}</span>
+                    <span class="badge bg-secondary">${app.status}</span>
+                </div>
+                <div class="mt-1 small text-muted">Дата: ${app.start_date} | Оплата: ${app.payment_method}</div>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-warning" onclick="updateStatus(${app.id}, 'Идет обучение')">Идет обучение</button>
+                    <button class="btn btn-sm btn-success" onclick="updateStatus(${app.id}, 'Обучение завершено')">Завершено</button>
+                </div>
+            </div>
+        `).join('') : '<p class="text-muted">Нет заявок по выбранному фильтру.</p>';
+    }
+
+    // ============================================================
+    // ОБРАБОТЧИК ИЗМЕНЕНИЯ ФИЛЬТРА ПО СТАТУСУ
+    // ============================================================
+    document.getElementById('statusFilter')?.addEventListener('change', filterAndRender);
+
+    // ============================================================
+    // ОБРАБОТЧИК КНОПКИ "ОБНОВИТЬ"
+    // ============================================================
+    document.getElementById('refreshBtn')?.addEventListener('click', loadAllApplications);
+
+    // ============================================================
+    // ФУНКЦИЯ: ОБНОВЛЕНИЕ СТАТУСА ЗАЯВКИ (глобальная для onclick в HTML)
     // ============================================================
     window.updateStatus = async function(id, status) {
         try {
@@ -316,17 +388,14 @@ if (document.getElementById('allApplications')) {
                 body: JSON.stringify({ id, status })
             });
             if (res.ok) {
-                // Обновляем текст статуса на странице без перезагрузки
-                document.getElementById(`status-${id}`).textContent = status;
+                // Перезагружаем список, чтобы обновить статус и updated_at
+                loadAllApplications();
             }
         } catch (err) {
             alert('Ошибка обновления');
         }
     };
 
-    // Обработчик кнопки "Обновить"
-    document.getElementById('refreshBtn')?.addEventListener('click', loadAllApplications);
-
-    // Инициализация
+    // Инициализация: загружаем заявки при открытии страницы
     loadAllApplications();
 }
