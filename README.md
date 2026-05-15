@@ -50,11 +50,11 @@ korochki-portal/
 
 1. Запустите модули **Apache** и **MySQL** в XAMPP Control Panel\Laragon.
 2. Откройте `http://localhost/phpmyadmin` → создайте базу данных `demoTrainin`.
-3. Перейдите во вкладку **SQL** → импортируйте файл `sql/demoTrainin.sql`.
-4. Скопируйте папку `korochki-portal` в директорию сервера:  
+3. Перейдите во вкладку **SQL** → импортируйте файл `config/demoTrainin.sql`.
+4. Скопируйте папку `demoExam` в директорию сервера:  
    `C:\xampp\htdocs\` (XAMPP) или `C:\laragon\www\` (laragon).
 5. Откройте в браузере:  
-   🔗 `http://localhost/korochki-portal/public/`
+   🔗 `http://localhost/demoExam/public/index.html`
 
 > 🔑 **Тестовые данные для входа:**
 > - Администратор: `login: Admin` / `password: KorokNET`

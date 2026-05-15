@@ -18,6 +18,34 @@ $user_id = $_SESSION['user_id'];
 $input = json_decode(file_get_contents('php://input'), true);
 
 // ============================================================
+// ОТПРАВКА ОТЗЫВА (POST-запрос)
+// ============================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($input['action']) && $input['action'] === 'review') {
+    $appId = $input['id'] ?? null;
+    $review = trim($input['review'] ?? '');
+
+    if (!$appId || !$review) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Неверные данные отзыва']);
+        exit;
+    }
+
+    // Проверяем, принадлежит ли заявка пользователю и завершена ли она
+    $stmt = $pdo->prepare("SELECT id FROM applications WHERE id = ? AND user_id = ? AND status = 'Обучение завершено'");
+    $stmt->execute([$appId, $user_id]);
+    if (!$stmt->fetch()) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Нельзя оставить отзыв для этой заявки']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("UPDATE applications SET feedback = ? WHERE id = ?");
+    $stmt->execute([$review, $appId]);
+    echo json_encode(['message' => 'Отзыв сохранён']);
+    exit;
+}
+
+// ============================================================
 // СОЗДАНИЕ НОВОЙ ЗАЯВКИ (POST-запрос)
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
