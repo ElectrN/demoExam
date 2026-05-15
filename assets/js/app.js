@@ -340,6 +340,9 @@ if (document.getElementById('allApplications')) {
     // ============================================================
     // ФУНКЦИЯ: ФИЛЬТРАЦИЯ И ОТРИСОВКА ЗАЯВОК
     // ============================================================
+    // ============================================================
+    // ФУНКЦИЯ: ФИЛЬТРАЦИЯ И ОТРИСОВКА ЗАЯВОК (с отображением отзывов)
+    // ============================================================
     function filterAndRender() {
         const filter = document.getElementById('statusFilter')?.value || 'all';
         // Фильтруем массив: если 'all' — показываем всё, иначе — только выбранный статус
@@ -353,18 +356,26 @@ if (document.getElementById('allApplications')) {
 
         // Формируем HTML для отображения заявок
         container.innerHTML = filtered.length ? filtered.map(app => `
-            <div class="card mb-2 p-2">
+            <div class="card mb-2 p-2 fade-in">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <span><strong>${app.user_fio}</strong> — ${app.course_name}</span>
                     <span class="badge bg-secondary">${app.status}</span>
                 </div>
-                <div class="mt-1 small text-muted">Дата: ${app.start_date} | Оплата: ${app.payment_method}</div>
+                <div class="mt-1 small text-muted">
+                    Дата: ${app.start_date} | Оплата: ${app.payment_method}
+                </div>
+                ${app.feedback ? `
+                    <div class="mt-2 p-2 bg-light rounded border-start border-4 border-primary">
+                        <small class="text-muted d-block mb-1">💬 Отзыв пользователя:</small>
+                        <p class="mb-0 small">${app.feedback}</p>
+                    </div>
+                ` : ''}
                 <div class="mt-2">
                     <button class="btn btn-sm btn-warning" onclick="updateStatus(${app.id}, 'Идет обучение')">Идет обучение</button>
                     <button class="btn btn-sm btn-success" onclick="updateStatus(${app.id}, 'Обучение завершено')">Завершено</button>
                 </div>
             </div>
-        `).join('') : '<p class="text-muted">Нет заявок по выбранному фильтру.</p>';
+        `).join('') : '<p class="text-muted fade-in">Нет заявок по выбранному фильтру.</p>';
     }
 
     // ============================================================
