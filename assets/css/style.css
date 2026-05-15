@@ -179,6 +179,15 @@ body {
     background-color: white;
 }
 
+/* ==================== ССЫЛКА В ФУТЕРЕ ==================== */
+footer a.text-primary {
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+footer a.text-primary:hover {
+    color: #0a58ca !important; /* чуть темнее при наведении */
+    text-decoration: underline !important;
+}
+
 /* ==================== АНИМАЦИИ ==================== */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(15px); }
